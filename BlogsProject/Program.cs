@@ -19,7 +19,7 @@ builder.Services.AddScoped<IPostRepository, MongoPostRepository>();
 // ------------------- Services -------------------
 builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<PostService>();
-
+builder.Services.AddSingleton(RedisCacheFactory.Create());
 // ------------------- Controllers -------------------
 builder.Services.AddControllers();
 
