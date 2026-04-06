@@ -30,10 +30,8 @@ public class BlogService
 
     public async Task Delete(string id)
     {
-        // Delete all posts belonging to this blog first
         await _posts.DeleteByBlog(id);
 
-        // Then delete the blog
         await _blogs.Delete(id);
     }
 }

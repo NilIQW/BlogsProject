@@ -42,7 +42,7 @@ public class RedisCacheService
         var value = await db.StringGetAsync($"post:{postId}");
         if (!value.HasValue) return null;
 
-        return JsonSerializer.Deserialize<Post>(value!);
+        return JsonSerializer.Deserialize<Post>(value.ToString());
     }
 
     public async Task SetPostAsync(Post post)
