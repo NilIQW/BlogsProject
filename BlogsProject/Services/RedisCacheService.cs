@@ -25,7 +25,7 @@ public class RedisCacheService
         _connection = ConnectionMultiplexer.Connect($"{_host}:{_port}, password={_password}");
     }
 
-    private IDatabase GetDatabase()
+    public IDatabase GetDatabase()
     {
         if (_connection == null)
             throw new Exception("Redis not connected");

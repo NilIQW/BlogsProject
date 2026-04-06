@@ -7,10 +7,12 @@ public class PostService
 {
     private readonly IPostRepository _repo;
     private readonly RedisCacheService _cache;
-    public PostService(IPostRepository repo, RedisCacheService cache)
+    private readonly CommentRateLimiterService _rateLimiter;
+    public PostService(IPostRepository repo, RedisCacheService cache,CommentRateLimiterService rateLimiter)
     {
         _repo = repo;
         _cache = cache;
+        _rateLimiter = rateLimiter;
     }
 
     public async Task<Post?> Get(string id)
@@ -42,7 +44,13 @@ public class PostService
 }
     public async Task AddComment(string postId, Comment comment)
     {
+        // 1️⃣ Check rate limit
+        var allowed = await _rateLimiter.CanCommentAsync(comment.UserId);
+        if (!allowed)
+            throw new Exception("Rate limit exceeded. Try again later.");
+
         await _repo.AddComment(postId, comment);
+
         await _cache.InvalidatePostAsync(postId);
     }
 }
