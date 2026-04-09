@@ -10,7 +10,7 @@ services:
     environment:
       MONGO_INITDB_DATABASE: blog-platform
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example123.
+      MONGO_INITDB_ROOT_PASSWORD: example123
     volumes:
       - mongo-data:/data/db
 
@@ -22,7 +22,7 @@ services:
       - "8081:8081"
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example123.
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example123
       ME_CONFIG_MONGODB_SERVER: mongo
 
   blog-api:
@@ -36,13 +36,13 @@ services:
       - "5000:80"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      MongoDB__ConnectionString: "mongodb://root:example123.@mongo:27017"
+      MongoDB__ConnectionString: "mongodb://root:example123@mongo:27017/blog-platform?authSource=admin"
       MongoDB__Database: "blog-platform"
     depends_on:
       - mongo
 
   redis:
-    image: redis:latest
+    image: redis/redis-stack:latest
     container_name: blog-redis
     ports:
       - "6379:6379"
@@ -51,5 +51,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+      
+   
 volumes:
   mongo-data:

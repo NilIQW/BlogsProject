@@ -1,3 +1,4 @@
+using BlogsProject.DTOs;
 using BlogsProject.Entities;
 using BlogsProject.Services;
 
@@ -39,10 +40,33 @@ public class PostsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("blogs/{blogId}/posts")]
+    public async Task<IActionResult> Create(string blogId, CreatePostDto dto)
+    {
+        var post = new Post
+        {
+            BlogId = blogId,
+            Title = dto.Title,
+            Body = dto.Body,
+            Tags = dto.Tags
+        };
+
+        var created = await _service.Create(post);
+
+        return Ok(created);
+    }
+
     [HttpPost("{id}/comments")]
     public async Task<IActionResult> AddComment(string id, Comment comment)
     {
         await _service.AddComment(id, comment);
         return NoContent();
+    }
+    
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string q)
+    {
+        var results = await _service.Search(q);
+        return Ok(results);
     }
 }

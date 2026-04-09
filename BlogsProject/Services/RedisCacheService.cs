@@ -63,4 +63,25 @@ public class RedisCacheService
 
         await db.KeyDeleteAsync($"post:{postId}");
     }
+    
+    public async Task CreateIndexAsync()
+    {
+        var db = GetDatabase();
+
+        try
+        {
+            await db.ExecuteAsync("FT.INFO", "idx:blogposts");
+        }
+        catch
+        {
+            await db.ExecuteAsync(
+                "FT.CREATE", "idx:blogposts",
+                "ON", "JSON",
+                "PREFIX", "1", "post:",
+                "SCHEMA",
+                "$.Title", "AS", "title", "TEXT",
+                "$.Body", "AS", "body", "TEXT"
+            );
+        }
+    }
 }

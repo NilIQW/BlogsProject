@@ -21,7 +21,11 @@ builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<CommentRateLimiterService>();
 
-builder.Services.AddSingleton(RedisCacheFactory.Create());
+var redis = RedisCacheFactory.Create();
+redis.Connect();
+await redis.CreateIndexAsync(); 
+
+builder.Services.AddSingleton(redis);
 // ------------------- Controllers -------------------
 builder.Services.AddControllers();
 
