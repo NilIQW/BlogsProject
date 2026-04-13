@@ -1,7 +1,6 @@
 using BlogsProject.Domain.Entities;
 using BlogsProject.Domain.Interfaces;
 using BlogsProject.Application.DTOs;
-using BlogsProject.Application.Services;
 using BlogsProject.Infrastructure.Redis;
 using StackExchange.Redis;
 

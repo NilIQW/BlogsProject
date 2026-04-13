@@ -1,6 +1,6 @@
 using StackExchange.Redis;
 
-namespace BlogsProject.Application.Services;
+namespace BlogsProject.Infrastructure.Redis;
 
 public class CommentRateLimiterService
 {

@@ -1,16 +1,15 @@
 using BlogsProject.Application.DTOs;
-using BlogsProject.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BlogsProject.Controllers;
+namespace BlogsProject.API.Controllers;
 
 [ApiController]
 [Route("api/posts")]
-public class PostsController : ControllerBase
+public class PostController : ControllerBase
 {
     private readonly PostService _service;
 
-    public PostsController(PostService service)
+    public PostController(PostService service)
     {
         _service = service;
     }

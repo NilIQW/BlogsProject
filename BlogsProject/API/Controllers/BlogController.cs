@@ -1,8 +1,7 @@
 using BlogsProject.Application.DTOs;
-using BlogsProject.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BlogsProject.Controllers;
+namespace BlogsProject.API.Controllers;
 
 [ApiController]
 [Route("api/blogs")]

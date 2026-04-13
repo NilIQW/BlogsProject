@@ -41,4 +41,24 @@ public class MongoPostReadRepository : IPostReadRepository
 
         return docs.Select(PostMapper.ToDomain).ToList();
     }
+    
+    public async Task Create(Post post)
+    {
+        var doc = PostMapper.ToDocument(post);
+        await _collection.InsertOneAsync(doc);
+    }
+
+    public async Task Update(Post post)
+    {
+        var doc = PostMapper.ToDocument(post);
+
+        await _collection.ReplaceOneAsync(
+            p => p.Id == post.Id,
+            doc);
+    }
+
+    public async Task Delete(string id)
+    {
+        await _collection.DeleteOneAsync(p => p.Id == id);
+    }
 }

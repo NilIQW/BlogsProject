@@ -1,3 +1,5 @@
+using BlogsProject.Application.Events;
+using BlogsProject.Application.Messaging;
 using BlogsProject.Domain.Entities;
 using BlogsProject.Domain.Interfaces;
 using BlogsProject.Infrastructure.Sql;
@@ -8,16 +10,21 @@ namespace BlogsProject.Infrastructure.Sql.Repositories;
 public class SqlPostWriteRepository : IPostWriteRepository
 {
     private readonly AppDbContext _db;
+    private readonly LocalMessageBus _bus; 
 
-    public SqlPostWriteRepository(AppDbContext db)
+    public SqlPostWriteRepository(AppDbContext db, LocalMessageBus bus)
     {
         _db = db;
+        _bus = bus;
     }
 
     public async Task<Post> Create(Post post)
     {
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();
+        
+        await _bus.PublishAsync(new PostCreatedEvent(post));
+
         return post;
     }
 

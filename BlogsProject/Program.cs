@@ -1,4 +1,6 @@
-using BlogsProject.Application.Services;
+using BlogsProject.Application.Events;
+using BlogsProject.Application.Handlers;
+using BlogsProject.Application.Messaging;
 using BlogsProject.Domain.Interfaces;
 using BlogsProject.Infrastructure.Mongo.Repositories;
 using StackExchange.Redis;
@@ -39,7 +41,9 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 
     return ConnectionMultiplexer.Connect(config);
 });
+
 builder.Services.AddScoped<IPostCache, PostCache>();
+builder.Services.AddSingleton<LocalMessageBus>();
 
 // ---------------- Repositories ----------------
 builder.Services.AddScoped<IBlogWriteRepository, SqlBlogWriteRepository>();
@@ -58,6 +62,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+var bus = app.Services.GetRequiredService<LocalMessageBus>();
+var handler = app.Services.GetRequiredService<PostCreatedEventHandler>();
+
+bus.Subscribe<PostCreatedEvent>(handler.Handle);
 
 app.UseSwagger();
 app.UseSwaggerUI();
