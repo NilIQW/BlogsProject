@@ -1,6 +1,5 @@
-using BlogsProject.DTOs;
-using BlogsProject.Entities;
-using BlogsProject.Services;
+using BlogsProject.Application.DTOs;
+using BlogsProject.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogsProject.Controllers;
@@ -15,29 +14,40 @@ public class PostsController : ControllerBase
     {
         _service = service;
     }
-    
+
+    // GET POST
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(string id)
+    public async Task<IActionResult> GetById(string id)
     {
-        var post = await _service.Get(id);
-        if (post == null) return NotFound();
-        return Ok(post);
+        var result = await _service.Get(id);
+        return result == null ? NotFound() : Ok(result);
     }
 
+    // GET POSTS BY BLOG
+    [HttpGet("blog/{blogId}")]
+    public async Task<IActionResult> GetByBlog(string blogId)
+    {
+        var result = await _service.GetByBlog(blogId);
+        return Ok(result);
+    }
+
+    // CREATE POST
+    [HttpPost("blog/{blogId}")]
+    public async Task<IActionResult> Create(string blogId, CreatePostDto dto)
+    {
+        var result = await _service.Create(blogId, dto);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
+
+    // UPDATE POST
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, UpdatePostDto dto)
     {
-        try
-        {
-            var updated = await _service.Update(id, dto);
-            return Ok(updated);
-        }
-        catch (Exception ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        var result = await _service.Update(id, dto);
+        return Ok(result);
     }
 
+    // DELETE POST
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -45,31 +55,19 @@ public class PostsController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("blogs/{blogId}/posts")]
-    public async Task<IActionResult> Create(string blogId, CreatePostDto dto)
-    {
-        var created = await _service.Create(blogId, dto);
-        return Ok(created);
-    }
-
+    // ADD COMMENT
     [HttpPost("{id}/comments")]
-    public async Task<IActionResult> AddComment(string id, CommentDto dto)
+    public async Task<IActionResult> AddComment(string id, CreateCommentDto dto)
     {
-        var comment = new Comment
-        {
-            UserId = dto.UserId,
-            Body = dto.Body,
-            CreatedAt = dto.CreatedAt == default ? DateTime.UtcNow : dto.CreatedAt
-        };
-
-        var createdComment = await _service.AddComment(id, comment);
-        return Ok(createdComment);
+        var result = await _service.AddComment(id, dto);
+        return Ok(result);
     }
 
+    // SEARCH
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string q)
     {
-        var results = await _service.Search(q);
-        return Ok(results);
+        var result = await _service.Search(q);
+        return Ok(result);
     }
 }

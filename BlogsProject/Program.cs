@@ -1,10 +1,21 @@
-using BlogsProject.Repositories;
-using BlogsProject.Services;
+using BlogsProject.Application.Services;
+using BlogsProject.Domain.Interfaces;
+using BlogsProject.Infrastructure.Mongo.Repositories;
+using StackExchange.Redis;
+using BlogsProject.Infrastructure.Redis;
+using BlogsProject.Infrastructure.Sql;
+using BlogsProject.Infrastructure.Sql.Repositories;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
+using MongoPostReadRepository = BlogsProject.Infrastructure.Mongo.Repositories.MongoPostReadRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ------------------- MongoDB Setup -------------------
+// ---------------- SQL ----------------
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Sql")));
+
+// ---------------- Mongo ----------------
 builder.Services.AddSingleton<IMongoClient>(
     new MongoClient(builder.Configuration["MongoDB:ConnectionString"]));
 
@@ -12,41 +23,47 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     sp.GetRequiredService<IMongoClient>()
         .GetDatabase(builder.Configuration["MongoDB:Database"]));
 
-// ------------------- Repositories -------------------
-builder.Services.AddScoped<IBlogRepository, MongoBlogRepository>();
-builder.Services.AddScoped<IPostRepository, MongoPostRepository>();
+// ---------------- Redis ----------------
+var redisConfig = builder.Configuration["Redis:Connection"];
 
-// ------------------- Services -------------------
+if (string.IsNullOrWhiteSpace(redisConfig))
+    throw new Exception("Redis connection string is missing");
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var config = ConfigurationOptions.Parse(redisConfig);
+
+    config.AbortOnConnectFail = false; // important for production
+    config.ConnectRetry = 5;
+    config.ReconnectRetryPolicy = new ExponentialRetry(5000);
+
+    return ConnectionMultiplexer.Connect(config);
+});
+builder.Services.AddScoped<IPostCache, PostCache>();
+
+// ---------------- Repositories ----------------
+builder.Services.AddScoped<IBlogWriteRepository, SqlBlogWriteRepository>();
+builder.Services.AddScoped<IPostWriteRepository, SqlPostWriteRepository>();
+
+builder.Services.AddScoped<IBlogReadRepository, MongoBlogReadRepository>();
+builder.Services.AddScoped<IPostReadRepository, MongoPostReadRepository>();
+
+// ---------------- Services ----------------
 builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<CommentRateLimiterService>();
 
-var redis = RedisCacheFactory.Create();
-redis.Connect();
-await redis.CreateIndexAsync(); 
-
-builder.Services.AddSingleton(redis);
-// ------------------- Controllers -------------------
 builder.Services.AddControllers();
-
-// ------------------- Swagger/OpenAPI -------------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ------------------- Middleware -------------------
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
-// Map controllers
 app.MapControllers();
 
 app.Run();

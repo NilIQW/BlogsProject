@@ -1,6 +1,6 @@
-using BlogsProject.Entities;
+using BlogsProject.Domain.Entities;
 
-namespace BlogsProject.Repositories;
+namespace BlogsProject.Infrastructure.Repositories;
 
 public interface IPostRepository
 {

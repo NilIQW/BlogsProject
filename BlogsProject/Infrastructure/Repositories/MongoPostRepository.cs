@@ -1,7 +1,7 @@
-using BlogsProject.Entities;
+using BlogsProject.Domain.Entities;
 using MongoDB.Driver;
 
-namespace BlogsProject.Repositories;
+namespace BlogsProject.Infrastructure.Repositories;
 
 public class MongoPostRepository : IPostRepository
 {

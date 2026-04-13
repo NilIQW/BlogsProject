@@ -1,9 +1,9 @@
-namespace BlogsProject.Entities;
-
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-public class Post
+namespace BlogsProject.Infrastructure.Mongo.Documents;
+
+public class PostDocument
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -14,9 +14,10 @@ public class Post
 
     public string Title { get; set; } = null!;
     public string Body { get; set; } = null!;
-    public List<string> Tags { get; set; } = [];
 
-    public List<Comment> Comments { get; set; } = [];
+    public List<string> Tags { get; set; } = new();
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public List<CommentDocument> Comments { get; set; } = new();
+
+    public DateTime CreatedAt { get; set; }
 }

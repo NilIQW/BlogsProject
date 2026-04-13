@@ -1,6 +1,8 @@
-using BlogsProject.DTOs;
-using BlogsProject.Services;
+using BlogsProject.Application.DTOs;
+using BlogsProject.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+
+namespace BlogsProject.Controllers;
 
 [ApiController]
 [Route("api/blogs")]
@@ -13,36 +15,39 @@ public class BlogsController : ControllerBase
         _service = service;
     }
 
+    // CREATE
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateBlogDto dto)
+    public async Task<IActionResult> Create(CreateBlogDto dto)
     {
-        var created = await _service.Create(dto);
-        return Ok(created);
+        var result = await _service.Create(dto);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
+    // GET BY ID
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(string id)
+    public async Task<IActionResult> GetById(string id)
     {
-        var (blog, posts) = await _service.Get(id);
-        if (blog == null) return NotFound();
-        return Ok(new { blog, posts });
+        var result = await _service.Get(id);
+        return result == null ? NotFound() : Ok(result);
     }
 
+    // GET ALL
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var blogs = await _service.GetAll();
-        return Ok(blogs);
+        var result = await _service.GetAll();
+        return Ok(result);
     }
 
+    // UPDATE
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, [FromBody] UpdateBlogDto dto)
+    public async Task<IActionResult> Update(string id, UpdateBlogDto dto)
     {
-        var updated = await _service.Update(id, dto);
-        if (updated == null) return NotFound();
-        return Ok(updated);
+        var result = await _service.Update(id, dto);
+        return result == null ? NotFound() : Ok(result);
     }
 
+    // DELETE
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {

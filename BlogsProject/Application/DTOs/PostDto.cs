@@ -1,4 +1,4 @@
-namespace BlogsProject.DTOs;
+namespace BlogsProject.Application.DTOs;
 
 public class CreatePostDto
 {
